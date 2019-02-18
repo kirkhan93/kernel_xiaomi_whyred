@@ -22,28 +22,23 @@ function parse_parameters() {
             # Help menu
             "-h"|"--help")
                 echo
-                echo "${BOLD}Script description:${RST} 
-Merges/cherry-picks Linux upstream into a kernel tree"
+                echo "${BOLD}Script description:${RST} Merges/cherry-picks Linux upstream into a kernel tree"
                 echo
                 echo "${BOLD}Optional parameters:${RST}"
                 echo " -b | --branch-name"
-                echo " Use this string instead of the actual branch for 
-the commit message"
+                echo " Use this string instead of the actual branch for the commit message"
                 echo
                 echo " -c | --cherry-pick"
-                echo " Call git cherry-pick instead of git merge when 
-updating from upstream"
+                echo " Call git cherry-pick instead of git merge when updating from upstream"
                 echo
                 echo " -f | --fetch-only"
-                echo " Simply fetches the linux-stable and 
-linux-stable-rc remotes then exits"
+                echo " Simply fetches the linux-stable and linux-stable-rc remotes then exits"
                 echo
                 echo " -i | --initial-merge"
                 echo " Do not add a commit log to the merge commit"
                 echo
                 echo " -p | --print-latest"
-                echo " Prints the latest version available for the 
-current kernel tree upstream then exits"
+                echo " Prints the latest version available for the current kernel tree upstream then exits"
                 echo
                 echo " -q | --queue"
                 echo " Use the patches from the stable queue"
@@ -52,22 +47,17 @@ current kernel tree upstream then exits"
                 echo " Update to the latest RC revision"
                 echo
                 echo " -s | --single-version"
-                echo " Updates to the next immediate version available 
-from linux-stable"
+                echo " Updates to the next immediate version available from linux-stable"
                 echo
                 echo " -t | --tag"
-                echo " Pulls the requested tag from Sasha Levin's 
-linux-stable repo (pending stable patches)"
+                echo " Pulls the requested tag from Sasha Levin's linux-stable repo (pending stable patches)"
                 echo
                 echo " -v | --version"
-                echo " Updates to the specified version (e.g. -v 
-3.18.78)"
+                echo " Updates to the specified version (e.g. -v 3.18.78)"
                 echo
                 echo "${BOLD}Notes:${RST}"
-                echo " 1. By default, the latest revision will be 
-merged."
-                echo " 2. If you already have a remote for upstream, 
-rename it to linux-stable so that multiple ones do not get added!"
+                echo " 1. By default, the latest revision will be merged."
+                echo " 2. If you already have a remote for upstream, rename it to linux-stable so that multiple ones do not get added!"
                 echo
                 exit 1 ;;
             # Don't add a log to the commit message
@@ -91,8 +81,7 @@ rename it to linux-stable so that multiple ones do not get added!"
             # repo
             "-t"|"--tag")
                 shift
-                [[ ${#} -lt 1 ]] && die "Please specify a version to 
-update!"
+                [[ ${#} -lt 1 ]] && die "Please specify a version to update!"
                 TAG_TO_PULL=${1}
                 UPDATE_MODE=0
                 UPDATE_METHOD=tag ;;
@@ -109,16 +98,13 @@ update!"
         shift
     done
     # Sanity checks
-    [[ ! -f Makefile ]] && die "This is not being run in a kernel tree!" 
--h
+    [[ ! -f Makefile ]] && die "This is not being run in a kernel tree!" -h
     [[ -z ${UPDATE_METHOD} ]] && UPDATE_METHOD=merge
     [[ -z ${UPDATE_MODE} ]] && UPDATE_MODE=2
 }
-# Update the linux-stable{-rc} remotes (and add them if they doesn't 
-# exist)
+# Update the linux-stable{-rc} remotes (and add them if they doesn't # exist)
 function verify_remote() {
-    add_remote "${1}" 
-https://git.kernel.org/pub/scm/linux/kernel/git/stable/"${2:-"${1}"}".git/
+    add_remote "${1}" https://git.kernel.org/pub/scm/linux/kernel/git/stable/"${2:-"${1}"}".git/
     if ! git fetch "${1}" && ! git fetch --tags "${1}"; then
         die "${1} remote update failed!"
     fi
@@ -129,17 +115,12 @@ function update_stable_mirror() {
     CUR_FOLDER=${PWD}
     if [[ ! -d ${KERNEL_FOLDER}/mirrors/linux-stable ]]; then
         mkdir -p "${KERNEL_FOLDER}/mirrors"
-        cd "${KERNEL_FOLDER}/mirrors" || die "Mirrors folder does not 
-exist!"
-        git clone --mirror 
-https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git 
-linux-stable
+        cd "${KERNEL_FOLDER}/mirrors" || die "Mirrors folder does not exist!"
+        git clone --mirror https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git linux-stable
         cd linux-stable || die "linux-stable folder does not exist!"
-        git remote set-url --push origin 
-git@github.com:nathanchance/linux-stable
+        git remote set-url --push origin git@github.com:nathanchance/linux-stable
     fi
-    cd "${KERNEL_FOLDER}/mirrors/linux-stable" || die "linux-stable 
-folder does not exist!"
+    cd "${KERNEL_FOLDER}/mirrors/linux-stable" || die "linux-stable folder does not exist!"
     git fetch -p origin
     if git push -q --mirror; then
         echo "linux-stable mirror updated successfully!"
@@ -186,8 +167,7 @@ v"${CURRENT_MAJOR_VERSION}"* | head -n 1 | sed s/v//)
     case ${UPDATE_MODE} in
         0)
             TARGET_SUBLEVEL=$((CURRENT_SUBLEVEL + 1))
-            TARGET_VERSION=${CURRENT_MAJOR_VERSION}.${TARGET_SUBLEVEL} 
-;;
+            TARGET_VERSION=${CURRENT_MAJOR_VERSION}.${TARGET_SUBLEVEL} ;;
         1)
             TARGET_VERSION=${VERSION_SUPPLIED} ;;
         2)
@@ -196,8 +176,7 @@ v"${CURRENT_MAJOR_VERSION}"* | head -n 1 | sed s/v//)
     if [[ -n ${RC} ]]; then
         TAG=linux-stable-rc/linux-${CURRENT_MAJOR_VERSION}.y
         RANGE=v${CURRENT_VERSION}..${TAG}
-        TARGET_VERSION=${TARGET_VERSION}$(git grep -h "\-rc" "${TAG}" -- 
-Makefile | cut -d ' ' -f 3)
+        TARGET_VERSION=${TARGET_VERSION}$(git grep -h "\-rc" "${TAG}" -- Makefile | cut -d ' ' -f 3)
         if ! [[ ${TARGET_VERSION} =~ "rc" ]]; then
             die "There is no RC version for ${CURRENT_MAJOR_VERSION}!\n"
         fi
@@ -212,40 +191,31 @@ Makefile | cut -d ' ' -f 3)
         QUEUE_BRANCH=queue-${CURRENT_MAJOR_VERSION}
         (
             git cl -q
-            if ! git rev-parse --verify "${QUEUE_BRANCH}" &>/dev/null; 
-then
+            if ! git rev-parse --verify "${QUEUE_BRANCH}" &>/dev/null; then
                 git checkout -q -b "${QUEUE_BRANCH}" 
 v"${CURRENT_VERSION}" || die "Error checking out ${QUEUE_BRANCH}!"
             else
-                git checkout -q "${QUEUE_BRANCH}" || die "Error checking 
-out ${QUEUE_BRANCH}"
-                git reset --hard -q v"${CURRENT_VERSION}" || die "Error 
-resetting ${QUEUE_BRANCH}"
+                git checkout -q "${QUEUE_BRANCH}" || die "Error checking out ${QUEUE_BRANCH}"
+                git reset --hard -q v"${CURRENT_VERSION}" || die "Error resetting ${QUEUE_BRANCH}"
             fi
         )
         echo "\n${BOLD}Fetching stable-queue...${RST}\n"
-        git -C "${KERNEL_FOLDER}/sources/stable-queue" pull &>/dev/null 
-|| die "Error pulling stable queue!"
+        git -C "${KERNEL_FOLDER}/sources/stable-queue" pull &>/dev/null || die "Error pulling stable queue!"
         echo "${BOLD}Generating ${QUEUE_BRANCH}...${RST}"
-        git quiltimport --patches 
-"${KERNEL_FOLDER}/sources/stable-queue/${QUEUE_BRANCH}" &>/dev/null || 
-die "Error creating ${QUEUE_BRANCH}!"
+        git quiltimport --patches "${KERNEL_FOLDER}/sources/stable-queue/${QUEUE_BRANCH}" &>/dev/null || die "Error creating ${QUEUE_BRANCH}!"
         git ch "${CB}" &>/dev/null
         RANGE=v${CURRENT_VERSION}..${QUEUE_BRANCH}
         TAG=${QUEUE_BRANCH}
         TARGET_VERSION=${QUEUE_BRANCH}
     else
-        [[ ${CURRENT_SUBLEVEL} -eq 0 ]] && 
-CURRENT_VERSION=${CURRENT_MAJOR_VERSION}
+        [[ ${CURRENT_SUBLEVEL} -eq 0 ]] && CURRENT_VERSION=${CURRENT_MAJOR_VERSION}
         RANGE=v${CURRENT_VERSION}..v${TARGET_VERSION}
         TAG=v${TARGET_VERSION}
         # Make sure target version is between current version and latest 
         # version
         TARGET_SUBLEVEL=${TARGET_VERSION##*.}
-        [[ ${TARGET_SUBLEVEL} -le ${CURRENT_SUBLEVEL} ]] && die "Current 
-version is up to date with target version ${TARGET_VERSION}!\n"
-        [[ ${TARGET_SUBLEVEL} -gt ${LATEST_SUBLEVEL} ]] && die "Target 
-version ${TARGET_VERSION} does not exist!\n"
+        [[ ${TARGET_SUBLEVEL} -le ${CURRENT_SUBLEVEL} ]] && die "Current version is up to date with target version ${TARGET_VERSION}!\n"
+        [[ ${TARGET_SUBLEVEL} -gt ${LATEST_SUBLEVEL} ]] && die "Target version ${TARGET_VERSION} does not exist!\n"
         echo
         echo "${BOLD}Target kernel version:${RST} ${TARGET_VERSION}"
     fi
@@ -256,19 +226,16 @@ function pre_exit_commands() {
 function cp_target_version() {
     header "Cherry-picking ${TARGET_VERSION}"
     if ! git cherry-pick "${RANGE}"; then
-        die "Cherry-pick needs manual intervention! Resolve conflicts 
-then run: git add . && git cherry-pick --continue"
+        die "Cherry-pick needs manual intervention! Resolve conflicts then run: git add . && git cherry-pick --continue"
     else
         header "${TARGET_VERSION} PICKED CLEANLY!" "${GRN}"
     fi
 }
 function create_merge_message() {
     MSG_FILE=$(mktemp)
-    echo "Merge ${TARGET_VERSION} into ${BRANCH_NAME:-"$(git cb)"}" >> 
-"${MSG_FILE}"
+    echo "Merge ${TARGET_VERSION} into ${BRANCH_NAME:-"$(git cb)"}" >> "${MSG_FILE}"
     if [[ -z ${INITIAL_MERGE} ]]; then
-        echo "\nChanges in ${TARGET_VERSION}: ($(git rev-list --count 
-"${RANGE}" 2> /dev/null) commits)" >> "${MSG_FILE}"
+        echo "\nChanges in ${TARGET_VERSION}: ($(git rev-list --count "${RANGE}" 2> /dev/null) commits)" >> "${MSG_FILE}"
         git log --reverse --format=" %s" "${RANGE}" >> "${MSG_FILE}"
     fi
     echo "\nSigned-off-by: $(git config --get user.name) <$(git config 
@@ -283,16 +250,13 @@ function append_conflicts() {
 function mg_target_version() {
     header "Merging ${TARGET_VERSION}"
     create_merge_message
-    if ! GIT_MERGE_VERBOSITY=1 git merge --gpg-sign --no-edit "${TAG}"; 
-then
+    if ! GIT_MERGE_VERBOSITY=1 git merge --gpg-sign --no-edit "${TAG}"; then
         append_conflicts
         mv "${MSG_FILE}" /tmp/mrg-msg
-        die "Merge needs manual intervention! Resolve conflicts then run 
-git fm."
+        die "Merge needs manual intervention! Resolve conflicts then run git fm."
     else
         gpg_available
-        git commit --amend --date="$(date)" --file "${MSG_FILE}" 
---gpg-sign --no-edit --quiet
+        git commit --amend --date="$(date)" --file "${MSG_FILE}" --gpg-sign --no-edit --quiet
         rm -f "${MSG_FILE}"
         header "${TARGET_VERSION} MERGED CLEANLY!" "${GRN}"
     fi
@@ -300,11 +264,9 @@ git fm."
 function pl_tag() {
     header "Merging ${TAG_TO_PULL}"
     gpg_available
-    if ! GIT_MERGE_VERBOSITY=1 git pll --no-edit 
-https://git.kernel.org/pub/scm/linux/kernel/git/sashal/linux-stable.git 
+    if ! GIT_MERGE_VERBOSITY=1 git pll --no-edit https://git.kernel.org/pub/scm/linux/kernel/git/sashal/linux-stable.git 
 "${TAG_TO_PULL}"; then
-        die "Merge needs manual intervention! Resolve conflicts then run 
-git fm."
+        die "Merge needs manual intervention! Resolve conflicts then run git fm."
     else
         header "${TAG_TO_PULL} MERGED CLEANLY!" "${GRN}"
     fi
@@ -318,7 +280,7 @@ function update_tree() {
     pre_exit_commands
     exit 0
 }
-source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || 
-return; pwd)/common" trap 'echo; die "Manually aborted!"' SIGINT SIGTERM 
-parse_parameters "${@}" update_sources generate_versions
+source "$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" || return; pwd)/common" trap 'echo; die "Manually aborted!"' SIGINT SIGTERM parse_parameters "${@}" 
+update_sources
+ generate_versions
 update_tree
