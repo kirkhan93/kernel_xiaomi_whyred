@@ -25,7 +25,7 @@ ANYKERNEL_DIR=/home/maimunakirkire/AnyKernel2
 EXPORT_DIR=/home/maimunakirkire/flashablezips
 
 # Make Changes to this before release
-ZIP_NAME="Kirks-R1.5"
+ZIP_NAME="Kirks-R2.2"
 
 # Tweakable Options Below
 export ARCH=arm64
@@ -50,7 +50,9 @@ make O=out mrproper
 
 echo "          Initialising DEFCONFIG        "
 
-make O=out ARCH=arm64 whyred-perf_defconfig
+#make O=out ARCH=arm64 whyred-perf_defconfig
+
+make O=out ARCH=arm64 whyred-perf_defconfig -e  "stop if u get errors"
 
 echo "          Cooking Kirks....        "
 
